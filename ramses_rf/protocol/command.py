@@ -6,7 +6,7 @@
 Construct a command (packet that is to be sent).
 """
 
-import asyncio
+import uasyncio as asyncio
 import functools
 import json
 import logging
@@ -14,7 +14,7 @@ import re
 from datetime import datetime as dt
 from datetime import timedelta as td
 from types import SimpleNamespace
-from typing import Any, Optional, Union
+#from typing import Any, Optional, Union
 
 from .address import HGI_DEV_ADDR, NON_DEV_ADDR, NUL_DEV_ADDR, Address, pkt_addrs
 from .const import COMMAND_REGEX
@@ -369,7 +369,8 @@ class Command(PacketBase):
 
     def __repr__(self) -> str:
         """Return an unambiguous string representation of this object."""
-        hdr = f' # {self._hdr}{f" ({self._ctx})" if self._ctx else ""}'
+        thdr=f" ({self._ctx})" if self._ctx else ""
+        hdr = f' # {self._hdr}{thdr}'
         return f"... {self}{hdr}"
 
     @property

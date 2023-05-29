@@ -4,8 +4,8 @@
 """RAMSES RF - a RAMSES-II protocol decoder & analyser."""
 
 import re
-from functools import lru_cache
-from typing import List
+#from functools import lru_cache
+#from typing import List
 
 from .const import (
     DEVICE_LOOKUP,
@@ -16,13 +16,13 @@ from .const import (
     __dev_mode__,
 )
 from .exceptions import InvalidAddrSetError
-from .helpers import typechecked
+#from .helpers import typechecked
 
 DEV_MODE = __dev_mode__ and False
 DEV_HVAC = True
 
-__device_id_regex__ = re.compile(r"^(-{2}:-{6}|\d{2}:\d{6})$")
-
+#__device_id_regex__ = re.compile(r"^(-{2}:-{6}|\d{2}:\d{6})$")
+__device_id_regex__ = re.compile(r"^(--:------|\d\d:\d\d\d\d\d\d)$")
 
 class Address:
     """The device Address class."""
@@ -74,7 +74,6 @@ class Address:
 
         # if value[:2] not in DEVICE_TYPES:
         #     return False
-
         return isinstance(value, str) and __device_id_regex__.match(value)  # type: ignore[return-value]
 
     @classmethod
@@ -85,8 +84,8 @@ class Address:
             raise TypeError
 
         _type, _tmp = device_id.split(":")
-
-        return f"{DEVICE_TYPES.get(_type, f'{_type:>3}')}:{_tmp}"
+        _d=DEVICE_TYPES.get(_type, f'{_type:>3}')
+        return f"{_d}:{_tmp}"
 
     @classmethod
     def convert_from_hex(cls, device_hex: str, friendly_id=False) -> str:
@@ -125,7 +124,7 @@ class Address:
     #     return cls(cls.convert_from_hex(hex_id))
 
 
-@lru_cache(maxsize=256)
+#@lru_cache(maxsize=256)
 def id_to_address(device_id) -> Address:
     return Address(id=device_id)
 
@@ -135,7 +134,7 @@ NON_DEV_ADDR = id_to_address(NON_DEVICE_ID)
 NUL_DEV_ADDR = id_to_address(NUL_DEVICE_ID)
 
 
-@typechecked
+#@typechecked
 def dev_id_to_hex_id(device_id: str) -> str:
     """Convert (say) '01:145038' (or 'CTL:145038') to '06368E'."""
 
@@ -151,7 +150,7 @@ def dev_id_to_hex_id(device_id: str) -> str:
     return f"{(int(dev_type) << 18) + int(device_id[-6:]):0>6X}"
 
 
-@typechecked
+#@typechecked
 def hex_id_to_dev_id(device_hex: str, friendly_id: bool = False) -> str:
     """Convert (say) '06368E' to '01:145038' (or 'CTL:145038')."""
     if device_hex == "FFFFFE":  # aka '63:262142'
@@ -169,8 +168,8 @@ def hex_id_to_dev_id(device_hex: str, friendly_id: bool = False) -> str:
     return f"{dev_type}:{_tmp & 0x03FFFF:06d}"
 
 
-@lru_cache(maxsize=128)
-@typechecked
+#@lru_cache(maxsize=128)
+#@typechecked
 def is_valid_dev_id(value: str, dev_class: str = None) -> bool:
     """Return True if a device_id is valid."""
 
@@ -188,9 +187,9 @@ def is_valid_dev_id(value: str, dev_class: str = None) -> bool:
     return True
 
 
-@lru_cache(maxsize=256)  # there is definite benefit in caching this
-@typechecked
-def pkt_addrs(pkt_fragment: str) -> tuple[Address, Address, List[Address]]:
+#@lru_cache(maxsize=256)  # there is definite benefit in caching this
+#@typechecked
+def pkt_addrs(pkt_fragment: str):
     """Return the address fields from (e.g): '01:078710 --:------ 01:144246'.
 
     Will raise an InvalidAddrSetError is the address fields are not valid.

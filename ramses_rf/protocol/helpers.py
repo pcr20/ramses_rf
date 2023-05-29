@@ -6,34 +6,35 @@
 Helper functions.
 """
 
-import ctypes
+import uctypes as ctypes
 import sys
 import time
 from datetime import datetime as dt
-from typing import Optional, Union
-
-try:
-    from typeguard import typechecked  # type: ignore[reportMissingImports]
-except ModuleNotFoundError:
-
-    def typechecked(fnc):  # type: ignore[no-redef]
-        def wrapper(*args, **kwargs):
-
-            return fnc(*args, **kwargs)
-
-        return wrapper
+#from typing import Optional, Union
 
 
-class _FILE_TIME(ctypes.Structure):
+#try:
+#    from typeguard import typechecked  # type: ignore[reportMissingImports]
+#except ModuleNotFoundError:
+#
+#    def typechecked(fnc):  # type: ignore[no-redef]
+#        def wrapper(*args, **kwargs):
+#
+#            return fnc(*args, **kwargs)
+#
+#        return wrapper
+
+
+class _FILE_TIME():
     """Data structure for GetSystemTimePreciseAsFileTime()."""
 
-    _fields_ = [("dwLowDateTime", ctypes.c_uint), ("dwHighDateTime", ctypes.c_uint)]
+    _fields_ = [("dwLowDateTime", ctypes.UINT), ("dwHighDateTime", ctypes.UINT)]
 
 
 file_time = _FILE_TIME()
 
 
-@typechecked
+#@typechecked
 def timestamp() -> float:
     """Return the number of seconds since the Unix epoch.
 
@@ -46,7 +47,7 @@ def timestamp() -> float:
     return _time - 134774 * 24 * 60 * 60  # otherwise, is since 1601-01-01T00:00:00Z
 
 
-@typechecked
+#@typechecked
 def dt_now() -> dt:
     """Return the current datetime as a local/naive datetime object.
 
@@ -58,13 +59,13 @@ def dt_now() -> dt:
     return dt.now()
 
 
-@typechecked
+#@typechecked
 def dt_str() -> str:
     """Return the current datetime as a isoformat string."""
     return dt_now().isoformat(timespec="microseconds")
 
 
-@typechecked
+#@typechecked
 def bool_from_hex(value: str) -> Optional[bool]:  # either 00 or C8
     """Convert a 2-char hex string into a boolean."""
     if not isinstance(value, str) or len(value) != 2:
@@ -74,7 +75,7 @@ def bool_from_hex(value: str) -> Optional[bool]:  # either 00 or C8
     return {"00": False, "C8": True}[value]
 
 
-@typechecked
+#@typechecked
 def date_from_hex(value: str) -> Optional[str]:  # YY-MM-DD
     """Convert am 8-char hex string into a date, format YY-MM-DD."""
     if not isinstance(value, str) or len(value) != 8:
@@ -88,7 +89,7 @@ def date_from_hex(value: str) -> Optional[str]:  # YY-MM-DD
     ).strftime("%Y-%m-%d")
 
 
-@typechecked
+#@typechecked
 def double(value: str, factor: int = 1) -> Optional[float]:
     """Convert a 4-char hex string into a double."""
     if not isinstance(value, str) or len(value) != 4:
@@ -98,7 +99,7 @@ def double(value: str, factor: int = 1) -> Optional[float]:
     return int(value, 16) / factor
 
 
-@typechecked
+#@typechecked
 def dtm_from_hex(value: str) -> Optional[str]:  # from parsers
     """Convert a 12/14-char hex string to an isoformat datetime (naive, local)."""
     #        00141B0A07E3  (...HH:MM:00)    for system_mode, zone_mode (schedules?)
@@ -120,7 +121,7 @@ def dtm_from_hex(value: str) -> Optional[str]:  # from parsers
     ).isoformat(timespec="seconds")
 
 
-@typechecked
+#@typechecked
 def dtm_to_hex(dtm: Union[str, dt, None]) -> str:
     """Convert a datetime (isoformat string, or object) to a 12-char hex string."""
 
@@ -134,7 +135,7 @@ def dtm_to_hex(dtm: Union[str, dt, None]) -> str:
     return _dtm_to_hex(*dtm.timetuple())
 
 
-@typechecked
+#@typechecked
 def dts_from_hex(value: str) -> Optional[str]:
     """YY-MM-DD HH:MM:SS."""
     if not isinstance(value, str) or len(value) != 12:
@@ -152,7 +153,7 @@ def dts_from_hex(value: str) -> Optional[str]:
     ).strftime("%y-%m-%dT%H:%M:%S")
 
 
-@typechecked
+#@typechecked
 def dts_to_hex(dtm: Union[str, dt, None]) -> str:  # TODO: WIP
     """YY-MM-DD HH:MM:SS."""
     if dtm is None:
@@ -173,7 +174,7 @@ def dts_to_hex(dtm: Union[str, dt, None]) -> str:  # TODO: WIP
     return f"{result:012X}"
 
 
-@typechecked
+#@typechecked
 def flag8(byte: str, lsb: bool = False) -> list:
     """Split a byte (as a hex str) into a list of 8 bits, MSB first by default."""
     if not isinstance(byte, str) or len(byte) != 2:
@@ -184,7 +185,7 @@ def flag8(byte: str, lsb: bool = False) -> list:
 
 
 # TODO: add a wrapper for EF, & 0xF0
-@typechecked
+#@typechecked
 def percent(value: str, high_res: bool = True) -> Optional[float]:  # c.f. valve_demand
     """Convert a 2-char hex string into a percentage.
 
@@ -202,7 +203,7 @@ def percent(value: str, high_res: bool = True) -> Optional[float]:  # c.f. valve
     return result
 
 
-@typechecked
+#@typechecked
 def str_from_hex(value: str) -> Optional[str]:  # printable ASCII characters
     """Return a string of printable ASCII characters."""
     # result = bytearray.fromhex(value).split(b"\x7F")[0]  # TODO: needs checking
@@ -212,7 +213,7 @@ def str_from_hex(value: str) -> Optional[str]:  # printable ASCII characters
     return result.decode("ascii").strip() if result else None
 
 
-@typechecked
+#@typechecked
 def str_to_hex(value: str) -> str:
     """Convert a string to a variable-length ASCII hex string."""
     if not isinstance(value, str):
@@ -220,7 +221,7 @@ def str_to_hex(value: str) -> str:
     return "".join(f"{ord(x):02X}" for x in value)  # or: value.encode().hex()
 
 
-@typechecked
+#@typechecked
 def temp_from_hex(value: str) -> Union[float, bool, None]:
     """Convert a 2's complement 4-byte hex string to an float."""
     if not isinstance(value, str) or len(value) != 4:
@@ -235,7 +236,7 @@ def temp_from_hex(value: str) -> Union[float, bool, None]:
     return (temp if temp < 2**15 else temp - 2**16) / 100
 
 
-@typechecked
+#@typechecked
 def temp_to_hex(value: Union[float, None]) -> str:
     """Convert a float to a 2's complement 4-byte hex string."""
     if value is None:
@@ -250,7 +251,7 @@ def temp_to_hex(value: Union[float, None]) -> str:
     return f"{temp if temp >= 0 else temp + 2 ** 16:04X}"
 
 
-@typechecked
+#@typechecked
 def valve_demand(value: str) -> dict:  # c.f. percent()
     """Convert a 2-char hex string into a percentage.
 

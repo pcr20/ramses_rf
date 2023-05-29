@@ -10,15 +10,17 @@ Works with (amongst others):
 - hometronics (16? zones)
 """
 
-import asyncio
+import uasyncio as asyncio
 import json
 import logging
 import os
 import signal
-from asyncio.futures import Future
+#from uasyncio.futures import Future
 from datetime import datetime as dt
-from threading import Lock
-from typing import Callable, Optional
+#from threading import Lock
+from uasyncio import Lock
+#from typing import Callable, Optional
+
 
 from .const import (
     ATTR_DEVICES,
@@ -232,16 +234,14 @@ class Gateway:
                 and dev_id != self.pkt_protocol._hgi80[SZ_DEVICE_ID]
             ):
                 _LOGGER.warning(
-                    f"Won't create a non-allowed device_id: {dev_id}"
-                    f" (if required, add it to the {KNOWN_LIST})"
+                    f"Won't create a non-allowed device_id: {dev_id} (if required, add it to the {KNOWN_LIST})"
                 )
                 self._unwanted.append(dev_id)
                 raise LookupError
 
             if dev_id in self._exclude:
                 _LOGGER.warning(
-                    f"Won't create a blocked device_id: {dev_id}"
-                    f" (if required, remove it from the {BLOCK_LIST})"
+                    f"Won't create a blocked device_id: {dev_id} (if required, remove it from the {BLOCK_LIST})"
                 )
                 self._unwanted.append(dev_id)
                 raise LookupError
@@ -429,7 +429,7 @@ class Gateway:
     def status(self) -> dict:
         return {ATTR_DEVICES: {d.id: d.status for d in sorted(self.devices)}}
 
-    def create_client(self, msg_handler) -> tuple[Callable, Callable]:
+    def create_client(self, msg_handler):
         """Create a client protocol for the RAMSES-II message transport."""
         return create_msg_stack(self, msg_handler)
 
@@ -447,7 +447,7 @@ class Gateway:
         ) as exc:
             _LOGGER.exception(f"create_cmd(): {exc}")
 
-    def send_cmd(self, cmd: Command, callback: Callable = None, **kwargs) -> Future:
+    def send_cmd(self, cmd: Command, callback = None, **kwargs):
         """Send a command with the option to return any response via callback.
 
         Response packets, if any, follow an RQ/W (as an RP/I), and have the same code.
@@ -486,11 +486,11 @@ class Gateway:
             raise ExpiredCallbackError(exc)
 
         except Exception as exc:
-            _LOGGER.warning(f"The command raised an exception: {exc!r}")
+            _LOGGER.warning(f"The command raised an exception: {exc}")
             raise ExpiredCallbackError(exc)
 
         else:
-            _LOGGER.debug(f"The command returned: {result!r}")
+            _LOGGER.debug(f"The command returned: {result}")
             return result
 
     def fake_device(

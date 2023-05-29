@@ -6,7 +6,7 @@
 import logging
 from datetime import timedelta as td
 from types import SimpleNamespace
-from typing import Dict
+#from typing import Dict
 
 from .const import DEV_KLASS
 
@@ -675,8 +675,11 @@ CODE_IDX_SIMPLE = [
     for k, v in CODES_SCHEMA.items()
     if k not in CODE_IDX_COMPLEX
     and (
-        (RQ in v and v[RQ].startswith(("^0[0-9A-F]", "^(0[0-9A-F]")))
-        or (I_ in v and v[I_].startswith(("^0[0-9A-F]", "^(0[0-9A-F]", "^((0[0-9A-F]")))
+        (RQ in v and v[RQ].startswith(("^0[0-9A-F]")))
+        or (RQ in v and v[RQ].startswith(("^(0[0-9A-F]")))
+        or (I_ in v and v[I_].startswith(("^0[0-9A-F]")))
+        or (I_ in v and v[I_].startswith(("^(0[0-9A-F]")))
+        or (I_ in v and v[I_].startswith(("^((0[0-9A-F]")))
     )
 ]
 CODE_IDX_SIMPLE.extend((_10A0, _3B00))
@@ -1029,13 +1032,18 @@ _DEV_KLASSES_HVAC: Dict[SimpleNamespace, Dict] = {
     },
 }
 
-CODES_BY_DEV_KLASS: Dict[SimpleNamespace, Dict] = {
+CODES_BY_DEV_KLASS= {
     DEV_KLASS.HGI: {  # HGI80: RF to (USB) serial gateway interface
         _PUZZ: {I_: {}, RQ: {}, W_: {}},
-    },  # HGI80s can do what they like
-    **{k: v for k, v in _DEV_KLASSES_HVAC.items() if k is not None},
-    **{k: v for k, v in _DEV_KLASSES_HEAT.items() if k is not None},
+    }  # HGI80s can do what they like
+#    **{k: v for k, v in _DEV_KLASSES_HVAC.items() if k is not None},
+#    **{k: v for k, v in _DEV_KLASSES_HEAT.items() if k is not None},
 }
+
+CODES_BY_DEV_KLASS.update({k: v for k, v in _DEV_KLASSES_HVAC.items() if k is not None})
+CODES_BY_DEV_KLASS.update({k: v for k, v in _DEV_KLASSES_HEAT.items() if k is not None})
+
+
 
 _CODES_EXCLUDED = (
     _0001,

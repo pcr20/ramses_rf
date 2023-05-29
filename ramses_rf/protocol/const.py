@@ -4,17 +4,19 @@
 """RAMSES RF - a RAMSES-II protocol decoder & analyser."""
 
 import re
-from types import SimpleNamespace
+#from types import SimpleNamespace
 
 __dev_mode__ = False
 DEV_MODE = __dev_mode__
 
 
 def slug(string: str) -> str:
-    return re.sub(r"[\W_]+", "_", string.lower())
 
+    #return re.sub(r"[\W_]+", "_", string.lower())
+    return string.lower()
 
-DEV_KLASS = SimpleNamespace(
+class _DEV:
+#DEV_KLASS = SimpleNamespace(
     DEV="DEV",  # Generic (promotable) device
     #
     HGI="HGI",  # Gateway interface (RF to USB), HGI80
@@ -40,8 +42,10 @@ DEV_KLASS = SimpleNamespace(
     SWI="SWI",  # HVAC switch, 22F[13]: 02|06|20|32|39|42|49|59 (no 20: are both)
     #
     JIM="JIM",  # Jasper Interface Module (EIM?)
-    JST="JST",  # Jasper Stat
-)
+    JST="JST"  # Jasper Stat
+
+DEV_KLASS=_DEV
+
 DEV_KLASS_BY_TYPE = {  # only CH/DHW defaults, not HVAC
     "00": DEV_KLASS.TRV,
     "01": DEV_KLASS.CTL,
@@ -177,7 +181,8 @@ _DEV_REGEX_HTG = r"^(10|13):[0-9]{6}$"
 _DEV_REGEX_UFC = r"^02:[0-9]{6}$"
 _DEV_REGEX_SEN = r"^('01'|'03'|'04'|'12'|'22'|'34'):[0-9]{6}$"
 
-DEVICE_ID_REGEX = SimpleNamespace(
+class _DEVICE_ID_REGEX:
+#DEVICE_ID_REGEX = SimpleNamespace(
     ANY=_DEV_REGEX_ANY,
     BDR=_DEV_REGEX_BDR,
     CTL=_DEV_REGEX_CTL,
@@ -185,8 +190,10 @@ DEVICE_ID_REGEX = SimpleNamespace(
     HGI=_DEV_REGEX_HGI,
     HTG=_DEV_REGEX_HTG,
     UFC=_DEV_REGEX_UFC,
-    SEN=_DEV_REGEX_SEN,
-)
+    SEN=_DEV_REGEX_SEN
+
+
+DEVICE_ID_REGEX = _DEVICE_ID_REGEX
 
 _OUT_DEVICE_TABLE = {
     # Honeywell evohome
@@ -386,7 +393,7 @@ _OUT_BDR_ROLES = {
     5: ATTR_ELEC_HEAT,
 }
 
-_0005_ZONE = SimpleNamespace(
+class __0005_ZONE:
     ALL="00",  # All Zone types
     ALL_SENSOR="04",  # All Zone types (with a sensor?)
     RAD="08",  # Radiator zones
@@ -398,9 +405,9 @@ _0005_ZONE = SimpleNamespace(
     DHW="0E",  # DHW valve domains
     HTG="0F",  # Heating control domains
     RFG="10",  # RFG gateway
-    ELE="11",  # Electrical zones  # TODO: no RP from older evohome
-)  # 03, 05, 06, 07: & >11 - no response from an 01:
-
+    ELE="11"  # Electrical zones  # TODO: no RP from older evohome
+  # 03, 05, 06, 07: & >11 - no response from an 01:
+_0005_ZONE=__0005_ZONE
 # RP --- 01:054173 18:006402 --:------ 0005 004 00100000  # before adding RFG100
 #  I --- 01:054173 --:------ 01:054173 1FC9 012 0010E004D39D001FC904D39D
 #  W --- 30:248208 01:054173 --:------ 1FC9 012 0010E07BC9900012907BC990
@@ -473,14 +480,16 @@ _0418_FAULT_TYPE = {
     "??": "bad_value",
 }
 
-SystemType = SimpleNamespace(
+class _SystemType:
+#SystemType = SimpleNamespace(
     CHRONOTHERM="chronotherm",
     EVOHOME="evohome",
     HOMETRONICS="hometronics",
     PROGRAMMER="programmer",
     SUNDIAL="sundial",
-    GENERIC="generic",
-)
+    GENERIC="generic"
+
+SystemType=_SystemType
 
 
 class AttrDict(dict):
