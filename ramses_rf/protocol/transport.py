@@ -471,7 +471,7 @@ class PacketProtocolBase(asyncio.Protocol):
 
     def __init__(self, gwy, pkt_handler: Callable) -> None:
 
-        _LOGGER.info(f"RAMSES_RF protocol library v{VERSION}, using {self}")
+        _LOGGER.info(f"XXXX CHANGED RAMSES_RF protocol library v{VERSION}, using {self}")
 
         self._gwy = gwy
         self._loop = gwy._loop
