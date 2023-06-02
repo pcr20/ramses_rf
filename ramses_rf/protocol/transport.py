@@ -832,12 +832,14 @@ class PacketProtocolQos(PacketProtocolPort):
     """Interface for a packet protocol (includes QoS)."""
 
     def __init__(self, gwy, pkt_handler: Callable) -> None:
+        _LOGGER.debug("PacketProtocolQos __init__ entered  %s", self)
         super().__init__(gwy, pkt_handler)
 
         # self._qos_lock = Lock()
         self._qos_cmd: None | Command = None
         self._tx_rcvd: None | Packet = None
         self._rx_rcvd: None | Packet = None
+        _LOGGER.debug("PacketProtocolQos __init__ completed  %s", self)
 
     def _pkt_received(self, pkt: Packet) -> None:
         """Called when packets are received (a callback).
