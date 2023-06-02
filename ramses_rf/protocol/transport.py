@@ -505,6 +505,7 @@ class PacketProtocolBase(asyncio.Protocol):
             self._hgi80[SZ_KNOWN_HGI] = known_hgis[0]
 
         self._use_regex = getattr(self._gwy.config, SZ_USE_REGEX, {})
+        _LOGGER.info(f"RAMSES_RF protocol library v{VERSION}, using {self} __init__ finished")
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(enforce_include={self.enforce_include})"
@@ -686,6 +687,7 @@ class PacketProtocolFile(PacketProtocolBase):
     """Interface for a packet protocol (for packet log)."""
 
     def __init__(self, gwy, pkt_handler: Callable) -> None:
+        _LOGGER.debug("PacketProtocolFile __init__ entered  %s", self)
         super().__init__(gwy, pkt_handler)
 
         self._dt_str_: str = None  # type: ignore[assignment]
@@ -729,6 +731,7 @@ class PacketProtocolPort(PacketProtocolBase):
     """Interface for a packet protocol (without QoS)."""
 
     def __init__(self, gwy, pkt_handler: Callable) -> None:
+        _LOGGER.debug("PacketProtocolPort __init__ entered  %s", self)
         super().__init__(gwy, pkt_handler)
 
         self._sem = asyncio.BoundedSemaphore()
