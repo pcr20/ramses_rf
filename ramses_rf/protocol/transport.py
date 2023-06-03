@@ -1069,8 +1069,9 @@ def create_pkt_stack(
         # For example:
         # - python client.py monitor 'rfc2217://localhost:5001'
         # - python client.py monitor 'alt:///dev/ttyUSB0?class=PosixPollSerial'
-
+        _LOGGER.debug("in get_serial_instance about to call SCH_SERIAL_PORT_CONFIG")
         ser_config = SCH_SERIAL_PORT_CONFIG(ser_config or {})
+        _LOGGER.debug("in get_serial_instance about to serial_for_url")
 
         try:
             ser_obj = serial_for_url(ser_name, **ser_config)
@@ -1079,7 +1080,7 @@ def create_pkt_stack(
                 "Failed to open %s (config: %s): %s", ser_name, ser_config, exc
             )
             raise
-
+        _LOGGER.debug("completed call to serial_for_url %s",ser_obj)
         try:  # FTDI on Posix/Linux would be a common environment for this library...
             ser_obj.set_low_latency_mode(True)
         except (
@@ -1088,7 +1089,7 @@ def create_pkt_stack(
             ValueError,
         ):  # Wrong OS/Platform/not FTDI
             pass
-
+        _LOGGER.debug("completed call to get_serial_instance %s",ser_obj)
         return ser_obj
 
     def issue_warning() -> None:
