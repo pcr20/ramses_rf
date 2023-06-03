@@ -1,7 +1,8 @@
 import logging
+from serial import SerialBase
 
 _LOGGER=logging.getLogger(__name__)
-class klass():
+class klass(SerialBase):
     def __init__(self, junk, *args, **kwargs):
         _LOGGER.debug("klass __init__ called: %s",self)
         return
