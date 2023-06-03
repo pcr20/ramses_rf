@@ -36,3 +36,7 @@ if DEV_MODE:
 
 class GracefulExit(SystemExit):
     code = 1
+
+
+import serial
+serial.protocol_handler_packages.append("ramses_rf")

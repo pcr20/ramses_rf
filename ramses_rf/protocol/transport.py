@@ -126,6 +126,121 @@ VALID_CHARACTERS = printable  # "".join((ascii_letters, digits, ":-<*# "))
 _PacketProtocolT = TypeVar("_PacketProtocolT", bound=asyncio.BaseProtocol)
 _PacketTransportT = TypeVar("_PacketTransportT", bound=asyncio.BaseTransport)
 
+import aioesphomeapi
+
+POLLER_TASK='poller_task'
+class EspHomeAPITransport(asyncio.Transport):
+    """Interface for a packet transport using polling."""
+
+    MAX_BUFFER_SIZE = 500
+
+    def __init__(self, loop, protocol, ser_instance, extra=None):
+        super().__init__(extra=extra)
+
+        self._loop = loop
+        self._protocol = protocol
+        self.serial = ser_instance
+        self._cli=None
+        self._is_closing = None
+        self._write_queue = None
+        self._sensors = None
+        self._services = None
+
+        _LOGGER.warning("EspHomeAPITransport init called %s",ser_instance)
+        self._extra[POLLER_TASK] = self._loop.create_task(self._polling_loop())
+        #self._extra[POLLER_TASK] = self._start()
+        _LOGGER.warning("EspHomeAPITransport init finished %s",ser_instance)
+
+
+    async def _serialwrite(self,data: str ):
+        await self._cli.execute_service(self._services[0], {"send_data": data})
+        #print("data sent: {}".format(data))
+
+    async def _subscribe_state_changes(self):
+        def change_callback(state):
+            """Print the state changes of the device.."""
+            if state.key in [t.key for t in self._sensors if "evohome" in t.name]:
+                #print(state, self._sensors)
+                #print(state.state)
+                self._protocol.data_received(state.state.encode())
+
+        # Subscribe to the state changes
+        await self._cli.subscribe_states(change_callback)
+
+
+    async def _setupesphome(self):
+        assert not self._cli,"esphomeapi must be connected"
+        if not self._sensors:
+             entities = await self._cli.list_entities_services()
+             self._sensors = entities[0]
+        if not self._services:
+             entities = await self._cli.list_entities_services()
+             self._services = entities[1]
+
+    async def _start(self):
+        _LOGGER.warning("EspHomeAPITransport _start called")
+        self._write_queue = Queue(maxsize=self.MAX_BUFFER_SIZE)
+        cli = aioesphomeapi.APIClient("esphome-web-39fca8.local", 6053, None,
+                                      noise_psk="MtaqewXP8Jim+YPbyFe0NhUUt8lPEg2JAb03VJp8WQ4=")
+        self._cli=cli
+
+        while not self._cli._connection:
+            try: 
+               await self._cli.connect(login=True)
+               break
+            except:
+               await asyncio.sleep(1.0)
+
+        # Get API version of the device's firmware
+        _LOGGER.warning("esphomeAPI verion: %s",cli.api_version)
+
+        # Show device details
+        device_info = await cli.device_info()
+        print(device_info)
+
+        # List all entities of the device
+        await self._setupesphome()
+
+        _LOGGER.warning("esphomeAPI sensor: %s",self._sensors)
+        _LOGGER.warning("esphomeAPI services: %s",self._services)
+
+        await self._subscribe_state_changes()
+        _LOGGER.warning("esphomeAPI subscribed")
+
+        self._protocol.connection_made(self)
+
+    async def _polling_loop(self):
+
+        await self._start()
+        _LOGGER.warning("esphomeAPI _polling_loop called _start() completed")
+
+        while True:
+            await asyncio.sleep(0.001)
+
+            if self._cli._connection is None:
+                await self._cli.connect(login=True)#TODO resubscribe??
+                await self._setupesphome()
+                await self._subscribe_state_changes()
+
+
+            if not self._write_queue.empty():
+                await self._serialwrite(self._write_queue.get())
+                self._write_queue.task_done()
+
+        self._protocol.connection_lost(exc=None)
+
+    def write(self, cmd):
+        """Write some data bytes to the transport.
+
+        This does not block; it buffers the data and arranges for it to be sent out
+        asynchronously.
+        """
+        #print("writing: {}".format(cmd))
+        self._write_queue.put_nowait(cmd)
+
+
+
+
 
 def _str(value: bytes) -> str:
     try:

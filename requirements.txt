@@ -2,3 +2,4 @@
 colorlog>=6.5.0
 pyserial-asyncio>=0.5
 voluptuous>=0.12.2
+aioesphomeapi=>13.7.4
