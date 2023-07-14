@@ -169,7 +169,7 @@ class EspHomeAPITransport(asyncio.Transport):
 
 
     async def _setupesphome(self):
-        assert not self._cli,"esphomeapi must be connected"
+        #assert not self._cli,"esphomeapi must be connected"
         if not self._sensors:
              entities = await self._cli.list_entities_services()
              self._sensors = entities[0]
@@ -195,7 +195,7 @@ class EspHomeAPITransport(asyncio.Transport):
         _LOGGER.warning("esphomeAPI verion: %s",cli.api_version)
 
         # Show device details
-        device_info = await cli.device_info()
+        device_info = await self._cli.device_info()
         print(device_info)
 
         # List all entities of the device
@@ -1122,10 +1122,10 @@ def create_pkt_stack(
     ser_instance = get_serial_instance(port_name, port_config)
     _LOGGER.debug("in protocol_factory_ completed call to get_serial_instance about to call SerTransportXXXX with %s %s",ser_instance,ser_instance.portstr)
 
-    if os.name == "nt" or ser_instance.portstr[:7] in ("rfc2217", "socket:"):
+    if "esphomeapi" in ser_instance.portstr:
+        return pkt_protocol, EspHomeAPITransport(gwy._loop, pkt_protocol, ser_instance)
+    elif os.name == "nt" or ser_instance.portstr[:7] in ("rfc2217", "socket:"):
         issue_warning()
         return pkt_protocol, SerTransportPoll(gwy._loop, pkt_protocol, ser_instance)
-    elif ser_instance.portstr == "esphomeapi" :
-        return pkt_protocol, EspHomeAPITransport(gwy._loop, pkt_protocol, ser_instance)
-    
+
     return pkt_protocol, SerTransportAsync(gwy._loop, pkt_protocol, ser_instance)

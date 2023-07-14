@@ -143,8 +143,8 @@ class MessageTransport(asyncio.Transport):
 
         # self._extra[self.WRITER] = self._loop.create_task(self._polling_loop())
 
-        for sig in (signal.SIGINT, signal.SIGTERM):
-            self._loop.add_signal_handler(sig, self.abort)
+        #for sig in (signal.SIGINT, signal.SIGTERM):
+            #self._loop.add_signal_handler(sig, self.abort)
 
         self._is_closing = False
 

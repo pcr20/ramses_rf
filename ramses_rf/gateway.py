@@ -151,6 +151,7 @@ class Engine:
             if self.msg_transport
             else None
         )
+        #pkt_receiver is the callback method which is called when data is received - provided by ramses_rf
 
         if self.ser_name:
             source = {SZ_PORT_NAME: self.ser_name, SZ_PORT_CONFIG: self._port_config}

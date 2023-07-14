@@ -170,7 +170,7 @@ def dts_from_hex(value: str) -> Optional[str]:
         return None
     _seqx = int(value, 16)
     return dt(
-        year=(_seqx & 0b1111111 << 24) >> 24,
+        year=((_seqx & 0b1111111 << 24) >> 24)+2000,
         month=(_seqx & 0b1111 << 36) >> 36,
         day=(_seqx & 0b11111 << 31) >> 31,
         hour=(_seqx & 0b11111 << 19) >> 19,
