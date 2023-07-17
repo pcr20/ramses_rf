@@ -7,6 +7,7 @@ Operates at the msg layer of: app - msg - pkt - h/w
 """
 from __future__ import annotations
 
+import os
 import asyncio
 import logging
 import signal
@@ -143,8 +144,9 @@ class MessageTransport(asyncio.Transport):
 
         # self._extra[self.WRITER] = self._loop.create_task(self._polling_loop())
 
-        #for sig in (signal.SIGINT, signal.SIGTERM):
-            #self._loop.add_signal_handler(sig, self.abort)
+        if not (os.name == "nt"):
+            for sig in (signal.SIGINT, signal.SIGTERM):
+                self._loop.add_signal_handler(sig, self.abort)
 
         self._is_closing = False
 

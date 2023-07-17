@@ -140,6 +140,9 @@ class EspHomeAPITransport(asyncio.Transport):
         self._loop = loop
         self._protocol = protocol
         self.serial = ser_instance
+        urldata=self.serial.port.split(':')
+        self.esphomeapi_port = int(urldata[2]) if len(urldata)>2 else 6053
+        self.esphomeapi_ip = urldata[1][2:]
         self._cli=None
         self._is_closing = None
         self._write_queue = None
@@ -180,7 +183,7 @@ class EspHomeAPITransport(asyncio.Transport):
     async def _start(self):
         _LOGGER.warning("EspHomeAPITransport _start called")
         self._write_queue = Queue(maxsize=self.MAX_BUFFER_SIZE)
-        cli = aioesphomeapi.APIClient("esphome-web-39fca8.local", 6053, None,
+        cli = aioesphomeapi.APIClient(self.esphomeapi_ip,self.esphomeapi_port, None,
                                       noise_psk="MtaqewXP8Jim+YPbyFe0NhUUt8lPEg2JAb03VJp8WQ4=")
         self._cli=cli
 
