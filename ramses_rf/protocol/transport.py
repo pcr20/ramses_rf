@@ -127,6 +127,7 @@ _PacketProtocolT = TypeVar("_PacketProtocolT", bound=asyncio.BaseProtocol)
 _PacketTransportT = TypeVar("_PacketTransportT", bound=asyncio.BaseTransport)
 
 import aioesphomeapi
+import urllib
 
 POLLER_TASK='poller_task'
 class EspHomeAPITransport(asyncio.Transport):
@@ -140,14 +141,16 @@ class EspHomeAPITransport(asyncio.Transport):
         self._loop = loop
         self._protocol = protocol
         self.serial = ser_instance
-        urldata=self.serial.port.split(':')
-        self.esphomeapi_port = int(urldata[2]) if len(urldata)>2 else 6053
-        self.esphomeapi_ip = urldata[1][2:]
+        urldata=urllib.parse.urlparse(self.serial.port)
+        self.esphomeapi_port = urldata.port
+        self.esphomeapi_ip = urldata.hostname
+        self.esphomeapi_key=urllib.parse.parse_qs(urldata.query)['key'][0]
         self._cli=None
         self._is_closing = None
         self._write_queue = None
         self._sensors = None
         self._services = None
+        #urllib.parse.urlencode({"key":"MtaqewXP8Jim+YPbyFe0NhUUt8lPEg2JAb03VJp8WQ4="})
 
         _LOGGER.warning("EspHomeAPITransport init called %s",ser_instance)
         self._extra[POLLER_TASK] = self._loop.create_task(self._polling_loop())
@@ -184,7 +187,7 @@ class EspHomeAPITransport(asyncio.Transport):
         _LOGGER.warning("EspHomeAPITransport _start called")
         self._write_queue = Queue(maxsize=self.MAX_BUFFER_SIZE)
         cli = aioesphomeapi.APIClient(self.esphomeapi_ip,self.esphomeapi_port, None,
-                                      noise_psk="MtaqewXP8Jim+YPbyFe0NhUUt8lPEg2JAb03VJp8WQ4=")
+                                      noise_psk=self.esphomeapi_key)
         self._cli=cli
 
         while not self._cli._connection:
